@@ -10,6 +10,7 @@ import { mentionChipInlineStyle, parseMentionChipHref } from "../lib/mention-chi
 import { issuesApi } from "../api/issues";
 import { queryKeys } from "../lib/queryKeys";
 import { parseIssueReferenceFromHref, remarkLinkIssueReferences } from "../lib/issue-reference";
+import { createRemarkLinkMdFiles } from "../lib/document-file-reference";
 import { remarkSoftBreaks } from "../lib/remark-soft-breaks";
 import { StatusIcon } from "./StatusIcon";
 
@@ -29,6 +30,8 @@ interface MarkdownBodyProps {
   resolveImageSrc?: (src: string) => string | null;
   /** Called when a user clicks an inline image */
   onImageClick?: (src: string) => void;
+  /** Document keys for the current issue — .md filenames matching a key become anchor links */
+  documentKeys?: readonly string[];
 }
 
 let mermaidLoaderPromise: Promise<typeof import("mermaid").default> | null = null;
@@ -568,6 +571,7 @@ export function MarkdownBody({
   resolveWikiLinkHref,
   resolveImageSrc,
   onImageClick,
+  documentKeys,
 }: MarkdownBodyProps) {
   const { theme } = useTheme();
   const remarkPlugins: NonNullable<Options["remarkPlugins"]> = [remarkGfm];
@@ -576,6 +580,9 @@ export function MarkdownBody({
   }
   if (linkIssueReferences) {
     remarkPlugins.push(remarkLinkIssueReferences);
+  }
+  if (documentKeys && documentKeys.length > 0) {
+    remarkPlugins.push(createRemarkLinkMdFiles(documentKeys));
   }
   if (softBreaks) {
     remarkPlugins.push(remarkSoftBreaks);

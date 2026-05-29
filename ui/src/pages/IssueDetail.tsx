@@ -3627,6 +3627,7 @@ export function IssueDetail() {
           multiline
           foldable
           mentions={mentionOptions}
+          documentKeys={(issue.documentSummaries ?? []).map((d) => d.key)}
           imageUploadHandler={async (file) => {
             const attachment = await uploadAttachment.mutateAsync(file);
             return attachment.contentPath;

@@ -19,6 +19,8 @@ interface InlineEditorProps {
   nullable?: boolean;
   /** When true, long display-mode markdown is clipped with a fade curtain that expands on click. */
   foldable?: boolean;
+  /** Document keys to make .md file references clickable in preview mode */
+  documentKeys?: readonly string[];
 }
 
 /** Shared padding so display and edit modes occupy the exact same box. */
@@ -55,6 +57,7 @@ export function InlineEditor({
   onDropFile,
   mentions,
   foldable = false,
+  documentKeys,
 }: InlineEditorProps) {
   const [editing, setEditing] = useState(false);
   const [multilineEditing, setMultilineEditing] = useState(false);
@@ -288,12 +291,12 @@ export function InlineEditor({
         >
           {foldable ? (
             <FoldCurtain>
-              <MarkdownBody className={cn("paperclip-edit-in-place-content", className)}>
+              <MarkdownBody className={cn("paperclip-edit-in-place-content", className)} documentKeys={documentKeys}>
                 {previewValue}
               </MarkdownBody>
             </FoldCurtain>
           ) : (
-            <MarkdownBody className={cn("paperclip-edit-in-place-content", className)}>
+            <MarkdownBody className={cn("paperclip-edit-in-place-content", className)} documentKeys={documentKeys}>
               {previewValue}
             </MarkdownBody>
           )}
