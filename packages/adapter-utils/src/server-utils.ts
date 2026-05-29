@@ -2024,11 +2024,12 @@ export async function runChildProcess(
               }, opts.timeoutSec * 1000)
             : null;
 
+        child.stdout?.setEncoding("utf8");
         child.stdout?.on("data", (chunk: unknown) => {
           const readable = child.stdout;
           if (!readable) return;
           readable.pause();
-          const text = String(chunk);
+          const text = typeof chunk === "string" ? chunk : Buffer.isBuffer(chunk) ? chunk.toString("utf8") : String(chunk);
           stdout = appendWithCap(stdout, text);
           maybeArmTerminalResultCleanup();
           logChain = logChain
@@ -2040,11 +2041,12 @@ export async function runChildProcess(
             });
         });
 
+        child.stderr?.setEncoding("utf8");
         child.stderr?.on("data", (chunk: unknown) => {
           const readable = child.stderr;
           if (!readable) return;
           readable.pause();
-          const text = String(chunk);
+          const text = typeof chunk === "string" ? chunk : Buffer.isBuffer(chunk) ? chunk.toString("utf8") : String(chunk);
           stderr = appendWithCap(stderr, text);
           maybeArmTerminalResultCleanup();
           logChain = logChain
