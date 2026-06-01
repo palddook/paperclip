@@ -1916,6 +1916,11 @@ export async function runChildProcess(
   return new Promise<RunProcessResult>((resolve, reject) => {
     const rawMerged: NodeJS.ProcessEnv = {
       ...sanitizeInheritedPaperclipEnv(process.env),
+      // Force UTF-8 output from Python subprocesses. Without this, Python on
+      // Windows defaults to the system code page (e.g. CP949 on Korean locale),
+      // causing Korean characters to be mis-decoded when the stream is read as UTF-8.
+      PYTHONUTF8: "1",
+      PYTHONIOENCODING: "utf-8",
       ...opts.env,
     };
 
