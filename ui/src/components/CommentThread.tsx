@@ -319,6 +319,7 @@ function CommentCard({
   agentMap,
   companyId,
   projectId,
+  workspaceFileBaseUrl,
   feedbackVote = null,
   feedbackDataSharingPreference = "prompt",
   feedbackTermsUrl = null,
@@ -331,6 +332,7 @@ function CommentCard({
   agentMap?: Map<string, Agent>;
   companyId?: string | null;
   projectId?: string | null;
+  workspaceFileBaseUrl?: string | null;
   feedbackVote?: FeedbackVoteValue | null;
   feedbackDataSharingPreference?: FeedbackDataSharingPreference;
   feedbackTermsUrl?: string | null;
@@ -563,6 +565,7 @@ const TimelineList = memo(function TimelineList({
   currentUserId,
   companyId,
   projectId,
+  workspaceFileBaseUrl,
   onApproveApproval,
   onRejectApproval,
   pendingApprovalAction,
@@ -578,6 +581,7 @@ const TimelineList = memo(function TimelineList({
   currentUserId?: string | null;
   companyId?: string | null;
   projectId?: string | null;
+  workspaceFileBaseUrl?: string | null;
   onApproveApproval?: (approvalId: string) => Promise<void>;
   onRejectApproval?: (approvalId: string) => Promise<void>;
   pendingApprovalAction?: {
@@ -709,6 +713,7 @@ const TimelineList = memo(function TimelineList({
             agentMap={agentMap}
             companyId={companyId}
             projectId={projectId}
+            workspaceFileBaseUrl={workspaceFileBaseUrl}
             feedbackVote={feedbackVoteByTargetId?.get(comment.id) ?? null}
             feedbackDataSharingPreference={feedbackDataSharingPreference}
             feedbackTermsUrl={feedbackTermsUrl}
@@ -954,6 +959,7 @@ export function CommentThread({
         currentUserId={currentUserId}
         companyId={companyId}
         projectId={projectId}
+        workspaceFileBaseUrl={workspaceFileBaseUrl}
         onApproveApproval={onApproveApproval}
         onRejectApproval={onRejectApproval}
         pendingApprovalAction={pendingApprovalAction}
