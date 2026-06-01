@@ -3440,7 +3440,7 @@ export function agentRoutes(
   // Security: resolves the real path and verifies it is inside the workspace dir.
   router.get("/agents/:agentId/workspace-files/:filename", async (req, res) => {
     const { agentId, filename } = req.params as { agentId: string; filename: string };
-    const agent = await agentSvc.getById(agentId);
+    const agent = await svc.getById(agentId);
     if (!agent) {
       res.status(404).json({ error: "Agent not found" });
       return;
