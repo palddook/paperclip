@@ -3918,7 +3918,13 @@ export function IssueDetail() {
               issueId={issue.id}
               companyId={issue.companyId}
               projectId={issue.projectId ?? null}
-              workspaceFileBaseUrl={issue.executionWorkspaceId ? `/api/execution-workspaces/${issue.executionWorkspaceId}/files` : null}
+              workspaceFileBaseUrl={
+                issue.executionWorkspaceId
+                  ? `/api/execution-workspaces/${issue.executionWorkspaceId}/files`
+                  : issue.assigneeAgentId
+                  ? `/api/agents/${issue.assigneeAgentId}/workspace-files`
+                  : null
+              }
               issueStatus={issue.status}
               issueWorkMode={issue.workMode ?? "standard"}
               executionRunId={issue.executionRunId ?? null}

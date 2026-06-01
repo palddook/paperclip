@@ -1,5 +1,6 @@
 import { Router, type Request, type Response } from "express";
 import { generateKeyPairSync, randomUUID } from "node:crypto";
+import * as fs from "node:fs";
 import path from "node:path";
 import type { Db } from "@paperclipai/db";
 import { agents as agentsTable, companies, heartbeatRuns, issues as issuesTable } from "@paperclipai/db";
@@ -96,6 +97,7 @@ import {
   loadDefaultAgentInstructionsBundle,
   resolveDefaultAgentInstructionsBundleRole,
 } from "../services/default-agent-instructions.js";
+import { resolveDefaultAgentWorkspaceDir } from "../home-paths.js";
 import { getTelemetryClient } from "../telemetry.js";
 import { assertEnvironmentSelectionForCompany } from "./environment-selection.js";
 import { recoveryService } from "../services/recovery/service.js";
@@ -3432,6 +3434,35 @@ export function agentRoutes(
       adapterType: agent.adapterType,
       outputSilence: await heartbeat.buildRunOutputSilence({ ...run, companyId: issue.companyId }),
     });
+  });
+
+  // Serve a file from the agent's default workspace directory.
+  // Security: resolves the real path and verifies it is inside the workspace dir.
+  router.get("/agents/:agentId/workspace-files/:filename", async (req, res) => {
+    const { agentId, filename } = req.params as { agentId: string; filename: string };
+    const agent = await agentSvc.getById(agentId);
+    if (!agent) {
+      res.status(404).json({ error: "Agent not found" });
+      return;
+    }
+    assertCompanyAccess(req, agent.companyId);
+    let workspaceDir: string;
+    try {
+      workspaceDir = resolveDefaultAgentWorkspaceDir(agentId);
+    } catch {
+      res.status(400).json({ error: "Invalid agent id" });
+      return;
+    }
+    const filePath = path.resolve(workspaceDir, filename);
+    if (!filePath.startsWith(workspaceDir + path.sep) && filePath !== workspaceDir) {
+      res.status(400).json({ error: "Invalid file path" });
+      return;
+    }
+    if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
+      res.status(404).json({ error: "File not found in agent workspace" });
+      return;
+    }
+    res.download(filePath, filename);
   });
 
   return router;
