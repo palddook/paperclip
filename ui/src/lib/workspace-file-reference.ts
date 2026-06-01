@@ -5,10 +5,11 @@ type MarkdownNode = {
   children?: MarkdownNode[];
 };
 
-// Matches filenames with common extensions (Korean + ASCII).
-// Excludes .md files (handled separately by document-file-reference).
+// Matches filenames with common extensions (Korean + ASCII), including .md.
+// In comment context only workspaceFileBaseUrl is active (documentKeys is not
+// passed), so .md filenames here become workspace download links.
 const WORKSPACE_FILE_RE =
-  /[\w가-힣一-鿿぀-ゟ゠-ヿ][\w가-힣一-鿿぀-ゟ゠-ヿ._\- ]*\.(pptx?|docx?|xlsx?|pdf|csv|txt|zip|png|jpe?g|gif|svg|mp4|mov|json|yaml|yml|sh|py|mjs|ts|js)(?=\s|$|[,;:)}\]])/gi;
+  /[\w가-힣一-鿿぀-ゟ゠-ヿ][\w가-힣一-鿿぀-ゟ゠-ヿ._\- ]*\.(pptx?|docx?|xlsx?|pdf|csv|txt|md|zip|png|jpe?g|gif|svg|mp4|mov|json|yaml|yml|sh|py|mjs|ts|js)(?=\s|$|[,;:)}\]])/gi;
 
 function linkifyWorkspaceFilesInText(value: string, baseUrl: string): MarkdownNode[] | null {
   const nodes: MarkdownNode[] = [];
