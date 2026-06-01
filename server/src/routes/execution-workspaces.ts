@@ -641,7 +641,11 @@ export function executionWorkspaceRoutes(db: Db) {
       res.status(404).json({ error: "File not found in workspace" });
       return;
     }
-    res.download(filePath, filename);
+    const encodedFilename = encodeURIComponent(filename);
+    res.setHeader("Content-Disposition", `attachment; filename*=UTF-8''${encodedFilename}`);
+    res.setHeader("Content-Type", "application/octet-stream");
+    res.setHeader("Content-Length", fs.statSync(filePath).size);
+    fs.createReadStream(filePath).pipe(res);
   });
 
   return router;
