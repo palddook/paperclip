@@ -1,5 +1,7 @@
 import { and, eq } from "drizzle-orm";
 import { Router, type Request, type Response } from "express";
+import * as fs from "node:fs";
+import * as nodePath from "node:path";
 import type { Db } from "@paperclipai/db";
 import { issues, projects, projectWorkspaces } from "@paperclipai/db";
 import {
@@ -612,6 +614,34 @@ export function executionWorkspaceRoutes(db: Db) {
       },
     });
     res.json(workspace);
+  });
+
+  // Serve a file from the execution workspace directory.
+  // Security: resolves the real path and verifies it is inside the workspace cwd.
+  router.get("/execution-workspaces/:id/files/:filename", async (req, res) => {
+    const id = req.params.id as string;
+    const filename = req.params.filename as string;
+    const workspace = await svc.getById(id);
+    if (!workspace) {
+      res.status(404).json({ error: "Execution workspace not found" });
+      return;
+    }
+    assertCompanyAccess(req, workspace.companyId);
+    if (!workspace.cwd) {
+      res.status(404).json({ error: "Workspace has no local directory" });
+      return;
+    }
+    const workspaceDir = nodePath.resolve(workspace.cwd);
+    const filePath = nodePath.resolve(workspaceDir, filename);
+    if (!filePath.startsWith(workspaceDir + nodePath.sep) && filePath !== workspaceDir) {
+      res.status(400).json({ error: "Invalid file path" });
+      return;
+    }
+    if (!fs.existsSync(filePath) || !fs.statSync(filePath).isFile()) {
+      res.status(404).json({ error: "File not found in workspace" });
+      return;
+    }
+    res.download(filePath, filename);
   });
 
   return router;

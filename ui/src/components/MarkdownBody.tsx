@@ -11,6 +11,7 @@ import { issuesApi } from "../api/issues";
 import { queryKeys } from "../lib/queryKeys";
 import { parseIssueReferenceFromHref, remarkLinkIssueReferences } from "../lib/issue-reference";
 import { createRemarkLinkMdFiles } from "../lib/document-file-reference";
+import { createRemarkLinkWorkspaceFiles } from "../lib/workspace-file-reference";
 import { remarkSoftBreaks } from "../lib/remark-soft-breaks";
 import { StatusIcon } from "./StatusIcon";
 
@@ -32,6 +33,8 @@ interface MarkdownBodyProps {
   onImageClick?: (src: string) => void;
   /** Document keys for the current issue — .md filenames matching a key become anchor links */
   documentKeys?: readonly string[];
+  /** Base URL for workspace file downloads — filenames with common extensions become download links */
+  workspaceFileBaseUrl?: string | null;
 }
 
 let mermaidLoaderPromise: Promise<typeof import("mermaid").default> | null = null;
@@ -572,6 +575,7 @@ export function MarkdownBody({
   resolveImageSrc,
   onImageClick,
   documentKeys,
+  workspaceFileBaseUrl,
 }: MarkdownBodyProps) {
   const { theme } = useTheme();
   const remarkPlugins: NonNullable<Options["remarkPlugins"]> = [remarkGfm];
@@ -583,6 +587,9 @@ export function MarkdownBody({
   }
   if (documentKeys && documentKeys.length > 0) {
     remarkPlugins.push(createRemarkLinkMdFiles(documentKeys));
+  }
+  if (workspaceFileBaseUrl) {
+    remarkPlugins.push(createRemarkLinkWorkspaceFiles(workspaceFileBaseUrl));
   }
   if (softBreaks) {
     remarkPlugins.push(remarkSoftBreaks);

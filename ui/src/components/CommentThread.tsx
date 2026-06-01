@@ -77,6 +77,8 @@ interface CommentThreadProps {
   timelineEvents?: IssueTimelineEvent[];
   companyId?: string | null;
   projectId?: string | null;
+  /** Base URL for workspace file downloads — passed through to MarkdownBody */
+  workspaceFileBaseUrl?: string | null;
   onApproveApproval?: (approvalId: string) => Promise<void>;
   onRejectApproval?: (approvalId: string) => Promise<void>;
   pendingApprovalAction?: {
@@ -408,7 +410,7 @@ function CommentCard({
           <CopyMarkdownButton text={comment.body} />
         </span>
       </div>
-      <MarkdownBody className="text-sm" softBreaks>{comment.body}</MarkdownBody>
+      <MarkdownBody className="text-sm" softBreaks workspaceFileBaseUrl={workspaceFileBaseUrl}>{comment.body}</MarkdownBody>
       {companyId && !isPending ? (
         <div className="mt-2 space-y-2">
           <PluginSlotOutlet
@@ -731,6 +733,7 @@ export function CommentThread({
   timelineEvents = [],
   companyId,
   projectId,
+  workspaceFileBaseUrl,
   onApproveApproval,
   onRejectApproval,
   pendingApprovalAction = null,

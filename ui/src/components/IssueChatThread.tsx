@@ -174,6 +174,7 @@ interface IssueChatMessageContext {
   ) => Promise<void> | void;
   issueStatus?: string;
   successfulRunHandoff?: SuccessfulRunHandoffState | null;
+  workspaceFileBaseUrl?: string | null;
 }
 
 const IssueChatCtx = createContext<IssueChatMessageContext>({
@@ -373,6 +374,8 @@ interface IssueChatThreadProps {
   ) => Promise<void> | void;
   composerRef?: Ref<IssueChatComposerHandle>;
   issueWorkMode?: IssueWorkMode;
+  /** Base URL for workspace file downloads — filenames in comments become download links */
+  workspaceFileBaseUrl?: string | null;
   /**
    * Hook for the parent to refetch comments when the user explicitly asks
    * to jump to the latest comment. Used to make sure the absolute newest
@@ -634,7 +637,7 @@ function commentDateLabel(date: Date | string | undefined): string {
 }
 
 const IssueChatTextPart = memo(function IssueChatTextPart({ text, recessed }: { text: string; recessed?: boolean }) {
-  const { onImageClick } = useContext(IssueChatCtx);
+  const { onImageClick, workspaceFileBaseUrl } = useContext(IssueChatCtx);
   if (isSuccessfulRunHandoffComment(text)) {
     return <SuccessfulRunHandoffCommentCallout text={text} recessed={recessed} onImageClick={onImageClick} />;
   }
@@ -644,6 +647,7 @@ const IssueChatTextPart = memo(function IssueChatTextPart({ text, recessed }: { 
       style={recessed ? { opacity: 0.55 } : undefined}
       softBreaks
       onImageClick={onImageClick}
+      workspaceFileBaseUrl={workspaceFileBaseUrl}
     >
       {text}
     </MarkdownBody>
@@ -3678,6 +3682,7 @@ export function IssueChatThread({
   assigneeUserId = null,
   onResumeFromBacklog,
   resumeFromBacklogPending = false,
+  workspaceFileBaseUrl,
 }: IssueChatThreadProps) {
   const location = useLocation();
   const lastScrolledHashRef = useRef<string | null>(null);
@@ -4157,6 +4162,7 @@ export function IssueChatThread({
       onCancelInteraction: stableOnCancelInteraction,
       issueStatus,
       successfulRunHandoff,
+      workspaceFileBaseUrl,
     }),
     [
       feedbackDataSharingPreference,
@@ -4167,6 +4173,7 @@ export function IssueChatThread({
       userProfileMap,
       stableOnVote,
       stableOnStopRun,
+      workspaceFileBaseUrl,
       stopRunLabel,
       stoppingRunLabel,
       stopRunVariant,

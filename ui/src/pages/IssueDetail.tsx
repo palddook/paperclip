@@ -611,6 +611,7 @@ type IssueDetailChatTabProps = {
   issueId: string;
   companyId: string;
   projectId: string | null;
+  workspaceFileBaseUrl?: string | null;
   issueStatus: Issue["status"];
   issueWorkMode: IssueWorkMode;
   executionRunId: string | null;
@@ -705,6 +706,7 @@ const IssueDetailChatTab = memo(function IssueDetailChatTab({
   onWorkModeChange,
   composerRef,
   footer,
+  workspaceFileBaseUrl,
   feedbackVotes,
   feedbackDataSharingPreference,
   feedbackTermsUrl,
@@ -949,6 +951,7 @@ const IssueDetailChatTab = memo(function IssueDetailChatTab({
             }
           : undefined}
         onImageClick={onImageClick}
+        workspaceFileBaseUrl={workspaceFileBaseUrl}
         onRefreshLatestComments={onRefreshLatestComments}
         assigneeUserId={assigneeUserId}
         onResumeFromBacklog={onResumeFromBacklog}
@@ -3915,6 +3918,7 @@ export function IssueDetail() {
               issueId={issue.id}
               companyId={issue.companyId}
               projectId={issue.projectId ?? null}
+              workspaceFileBaseUrl={issue.executionWorkspaceId ? `/api/execution-workspaces/${issue.executionWorkspaceId}/files` : null}
               issueStatus={issue.status}
               issueWorkMode={issue.workMode ?? "standard"}
               executionRunId={issue.executionRunId ?? null}
