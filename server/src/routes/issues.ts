@@ -116,6 +116,15 @@ import { parseIssueExecutionWorkspaceSettings } from "../services/execution-work
 import type { PluginWorkerManager } from "../services/plugin-worker-manager.js";
 
 const MAX_ISSUE_COMMENT_LIMIT = 500;
+
+// Strip C0 control characters except tab, newline, and carriage return.
+// BEL (0x07) and similar chars appear when Korean text is corrupted via
+// shell heredoc command-substitution or CP949/ASCII encoding mis-matches.
+function sanitizeCommentBody(body: unknown): string {
+  if (typeof body !== "string") return "";
+  // eslint-disable-next-line no-control-regex
+  return body.replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, "");
+}
 const updateIssueRouteSchema = updateIssueSchema.extend({
   interrupt: z.boolean().optional(),
 });
@@ -5599,7 +5608,7 @@ export function issueRoutes(
       }
     }
 
-    const comment = await svc.addComment(id, req.body.body, {
+    const comment = await svc.addComment(id, sanitizeCommentBody(req.body.body), {
       agentId: actor.agentId ?? undefined,
       userId: actor.actorType === "user" ? actor.actorId : undefined,
       runId: actor.runId,

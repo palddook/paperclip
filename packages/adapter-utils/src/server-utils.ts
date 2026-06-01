@@ -1254,11 +1254,14 @@ async function resolveSpawnTarget(
   if (/\.(cmd|bat)$/i.test(executable)) {
     // Always use cmd.exe for .cmd/.bat wrappers. Some environments override
     // ComSpec to PowerShell, which breaks cmd-specific flags like /d /s /c.
+    // Prepend `chcp 65001` to switch the console code page to UTF-8 before
+    // running the wrapper, preventing Korean/multibyte characters from being
+    // mis-encoded as CP949 in pipe I/O on Korean-locale Windows systems.
     const shell = resolveWindowsCmdShell(env);
     const commandLine = [quoteForCmd(executable), ...args.map(quoteForCmd)].join(" ");
     return {
       command: shell,
-      args: ["/d", "/s", "/c", commandLine],
+      args: ["/d", "/s", "/c", `chcp 65001 > nul && ${commandLine}`],
     };
   }
 
